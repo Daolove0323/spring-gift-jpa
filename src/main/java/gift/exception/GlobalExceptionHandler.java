@@ -16,42 +16,15 @@ public class GlobalExceptionHandler {
             .body(ex.getBindingResult().getFieldError().getDefaultMessage());
     }
 
-    @ExceptionHandler(ProductAlreadyExistsException.class)
-    public ResponseEntity<String> handleProductAlreadyExistsException(
-        ProductAlreadyExistsException ex) {
-        return ResponseEntity.badRequest().body(ex.getMessage());
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<String> handleConflictException(
+        ConflictException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
     }
 
-    @ExceptionHandler(ProductNotExistsException.class)
-    public ResponseEntity<String> handleProductNotExistsException(ProductNotExistsException ex) {
-        return ResponseEntity.badRequest().body(ex.getMessage());
-    }
-
-    @ExceptionHandler(MemberAlreadyExistsException.class)
-    public ResponseEntity<String> handleMemberAlreadyExistsException(
-        MemberAlreadyExistsException ex) {
-        return ResponseEntity.badRequest().body(ex.getMessage());
-    }
-
-    @ExceptionHandler(MemberNotExistsException.class)
-    public ResponseEntity<String> handleMemberNotExistsException(MemberNotExistsException ex) {
-        return ResponseEntity.badRequest().body(ex.getMessage());
-    }
-
-    @ExceptionHandler(PasswordNotMatchedException.class)
-    public ResponseEntity<String> handlePasswordNotMatchedException(
-        PasswordNotMatchedException ex) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
-    }
-
-    @ExceptionHandler(WishNotExistsException.class)
-    public ResponseEntity<String> handleWishNotExistsException(WishNotExistsException ex) {
-        return ResponseEntity.badRequest().body(ex.getMessage());
-    }
-
-    @ExceptionHandler(WishAlreadyExistsException.class)
-    public ResponseEntity<String> handleWishAlreadyExistsException(WishAlreadyExistsException ex) {
-        return ResponseEntity.badRequest().body(ex.getMessage());
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<String> handleNotFoundException(NotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
 
     @ExceptionHandler(UnauthenticatedException.class)

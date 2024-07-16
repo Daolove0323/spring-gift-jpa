@@ -1,6 +1,5 @@
-package gift;
+package gift.config;
 
-import gift.login.LoginMemberArgumentResolver;
 import gift.service.MemberService;
 import java.util.List;
 import org.springframework.context.annotation.Configuration;

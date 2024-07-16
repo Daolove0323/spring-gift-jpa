@@ -1,4 +1,4 @@
-package gift.ssr;
+package gift.admin;
 
 import org.springframework.ui.Model;
 import org.springframework.web.bind.MethodArgumentNotValidException;

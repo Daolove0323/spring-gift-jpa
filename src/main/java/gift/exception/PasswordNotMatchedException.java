@@ -1,6 +1,6 @@
 package gift.exception;
 
-public class PasswordNotMatchedException extends RuntimeException {
+public class PasswordNotMatchedException extends UnauthenticatedException {
 
     public PasswordNotMatchedException() {
         super("Password is wrong");

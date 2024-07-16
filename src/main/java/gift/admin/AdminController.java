@@ -1,4 +1,4 @@
-package gift.ssr;
+package gift.admin;
 
 import gift.controller.auth.LoginRequest;
 import gift.controller.member.MemberRequest;

@@ -1,31 +1,36 @@
 package gift;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import gift.controller.GlobalMapper;
+import gift.controller.auth.AuthMapper;
 import gift.controller.auth.LoginRequest;
 import gift.controller.auth.Token;
 import gift.controller.product.ProductRequest;
 import gift.controller.product.ProductResponse;
 import gift.controller.wish.WishCreateRequest;
 import gift.controller.wish.WishResponse;
-import gift.login.JwtUtil;
 import gift.service.MemberService;
 import gift.service.ProductService;
+import gift.util.JwtUtil;
 import java.net.URI;
 import java.util.List;
 import java.util.UUID;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -41,7 +46,23 @@ class ApplicationTest {
     @Autowired
     private ProductService productService;
 
+    //안되는거
     @Test
+    void exchangeTest() {
+        restTemplate.exchange(new RequestEntity<>(HttpMethod.GET, URI.create("http://localhost:" + port + "/notExist")), Void.class);
+    }
+
+    // 되는거
+    @Test
+    void myTest() {
+        String url = "http://localhost:" + port + "/api/members/test";
+        RequestEntity<Void> request = new RequestEntity<>(null, HttpMethod.GET, URI.create(url));
+        Throwable exception = Assertions.assertThrows(HttpClientErrorException.class, () -> {
+            restTemplate.exchange(request, String.class);
+        });
+        assertThat(exception.getMessage()).contains("Access forbidden");
+    }
+
     void scenarioTest() {
         // register
         String url = "http://localhost:" + port + "/api/members/register";
@@ -76,15 +97,15 @@ class ApplicationTest {
         url = "http://localhost:" + port + "/api/products";
         RequestEntity<Void> voidRequestEntity = new RequestEntity<>(null, headers, HttpMethod.GET,
             URI.create(url));
-        ResponseEntity<List<ProductResponse>> productsResponse = restTemplate.exchange(
-            voidRequestEntity, new ParameterizedTypeReference<List<ProductResponse>>() {
+        ResponseEntity<Page<ProductResponse>> productsResponse = restTemplate.exchange(
+            voidRequestEntity, new ParameterizedTypeReference<Page<ProductResponse>>() {
             });
         assertThat(productsResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         // wish create
         String email = JwtUtil.verifyToken(new Token(token)).getSubject();
-        UUID memberId = GlobalMapper.toLoginResponse(memberService.findByEmail(email)).id();
-        UUID productId = productsResponse.getBody().get(0).id();
+        UUID memberId = AuthMapper.toLoginResponse(memberService.findByEmail(email)).id();
+        UUID productId = productsResponse.getBody().getContent().get(0).id();
         url = "http://localhost:" + port + "/api/wishes/" + memberId;
         RequestEntity<WishCreateRequest> wishRequestEntity = new RequestEntity<>(
             new WishCreateRequest(productId, 3L), headers, HttpMethod.POST, URI.create(url));
@@ -94,7 +115,7 @@ class ApplicationTest {
 
         // wish get
         url = "http://localhost:" + port + "/api/wishes/" + memberId;
-        voidRequestEntity = new RequestEntity<>(headers, HttpMethod.GET, URI.create(url));
+        voidRequestEntity = new RequestEntity<>(null, headers, HttpMethod.GET, URI.create(url));
         ResponseEntity<List<WishResponse>> wishesResponse = restTemplate.exchange(voidRequestEntity,
             new ParameterizedTypeReference<List<WishResponse>>() {
             });

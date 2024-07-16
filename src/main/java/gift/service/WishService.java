@@ -1,7 +1,9 @@
 package gift.service;
 
-import gift.controller.GlobalMapper;
+import static gift.controller.wish.WishMapper.toWishResponse;
+
 import gift.controller.wish.WishCreateRequest;
+import gift.controller.wish.WishMapper;
 import gift.controller.wish.WishResponse;
 import gift.controller.wish.WishUpdateRequest;
 import gift.domain.Member;
@@ -37,14 +39,14 @@ public class WishService {
 
     public Page<WishResponse> findAll(Pageable pageable) {
         Page<Wish> wishPage = wishRepository.findAll(pageable);
-        List<WishResponse> wishResponses = wishPage.stream().map(GlobalMapper::toWishResponse)
+        List<WishResponse> wishResponses = wishPage.stream().map(WishMapper::toWishResponse)
             .toList();
         return new PageImpl<>(wishResponses, pageable, wishPage.getTotalElements());
     }
 
     public Page<WishResponse> findAllByMemberId(UUID memberId, Pageable pageable) {
         Page<Wish> wishPage = wishRepository.findAllByMemberId(memberId, pageable);
-        List<WishResponse> wishResponses = wishPage.stream().map(GlobalMapper::toWishResponse)
+        List<WishResponse> wishResponses = wishPage.stream().map(WishMapper::toWishResponse)
             .toList();
         return new PageImpl<>(wishResponses, pageable, wishPage.getTotalElements());
     }
@@ -58,15 +60,14 @@ public class WishService {
         Product product = productRepository.findById(wish.productId())
             .orElseThrow(ProductNotExistsException::new);
 
-        return GlobalMapper.toWishResponse(
-            wishRepository.save(new Wish(member, product, wish.count())));
+        return toWishResponse(wishRepository.save(new Wish(member, product, wish.count())));
     }
 
     public WishResponse update(UUID memberId, UUID productId, WishUpdateRequest wish) {
         Wish target = wishRepository.findByMemberIdAndProductId(memberId, productId)
             .orElseThrow(WishNotExistsException::new);
         target.setCount(wish.count());
-        return GlobalMapper.toWishResponse(wishRepository.save(target));
+        return toWishResponse(wishRepository.save(target));
     }
 
     // @Transactional

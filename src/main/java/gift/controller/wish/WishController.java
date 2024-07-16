@@ -72,4 +72,3 @@ public class WishController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
     }
 }
-

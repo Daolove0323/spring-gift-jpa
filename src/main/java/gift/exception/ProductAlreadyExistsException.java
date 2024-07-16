@@ -1,6 +1,6 @@
 package gift.exception;
 
-public class ProductAlreadyExistsException extends RuntimeException {
+public class ProductAlreadyExistsException extends ConflictException {
 
     public ProductAlreadyExistsException() {
         super("Product already exists");

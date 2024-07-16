@@ -5,7 +5,7 @@ import gift.controller.auth.Token;
 import gift.domain.Member;
 import gift.exception.MemberNotExistsException;
 import gift.exception.PasswordNotMatchedException;
-import gift.login.JwtUtil;
+import gift.util.JwtUtil;
 import gift.repository.MemberRepository;
 import org.springframework.stereotype.Service;
 

@@ -1,4 +1,4 @@
-package gift.login;
+package gift.util;
 
 import gift.controller.auth.Token;
 import io.jsonwebtoken.Claims;

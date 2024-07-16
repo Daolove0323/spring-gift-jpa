@@ -1,13 +1,13 @@
-package gift.login;
+package gift.config;
 
-import static gift.login.JwtUtil.verifyToken;
+import static gift.util.JwtUtil.verifyToken;
 
-import gift.controller.GlobalMapper;
+import gift.controller.auth.AuthMapper;
 import gift.controller.auth.Token;
-import gift.exception.UnauthenticatedException;
+import gift.exception.HttpHeaderNotValidException;
+import gift.login.LoginMember;
 import gift.service.MemberService;
 import io.jsonwebtoken.Claims;
-import java.util.UUID;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -32,10 +32,10 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
         NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
         String authHeader = webRequest.getHeader("Authorization");
         if (authHeader == null) {
-            throw new UnauthenticatedException("Authorization Header is empty");
+            throw new HttpHeaderNotValidException("Authorization Header is empty");
         }
         if (!authHeader.startsWith("Bearer ")) {
-            throw new UnauthenticatedException(
+            throw new HttpHeaderNotValidException(
                 "Authorization Header does not start with 'Bearer '");
         }
         Token token = new Token(authHeader.substring(7));
@@ -43,10 +43,9 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
         try {
             claims = verifyToken(token);
         } catch (Exception e) {
-            throw new UnauthenticatedException(
-                "UnauthenticatedException occurred while verifying the token");
+            throw new HttpHeaderNotValidException();
         }
         String email = claims.getSubject();
-        return GlobalMapper.toLoginResponse(memberService.findByEmail(email));
+        return AuthMapper.toLoginResponse(memberService.findByEmail(email));
     }
 }

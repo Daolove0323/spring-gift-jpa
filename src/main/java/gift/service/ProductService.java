@@ -1,6 +1,9 @@
 package gift.service;
 
-import gift.controller.GlobalMapper;
+import static gift.controller.product.ProductMapper.from;
+import static gift.controller.product.ProductMapper.toProductResponse;
+
+import gift.controller.product.ProductMapper;
 import gift.controller.product.ProductRequest;
 import gift.controller.product.ProductResponse;
 import gift.domain.Product;
@@ -26,13 +29,13 @@ public class ProductService {
     public Page<ProductResponse> findAll(Pageable pageable) {
         Page<Product> productPage = productRepository.findAll(pageable);
         List<ProductResponse> productResponses = productPage.stream()
-            .map(GlobalMapper::toProductResponse).toList();
+            .map(ProductMapper::toProductResponse).toList();
         return new PageImpl<>(productResponses, pageable, productPage.getTotalElements());
     }
 
     public ProductResponse find(UUID id) {
         Product target = productRepository.findById(id).orElseThrow(ProductNotExistsException::new);
-        return GlobalMapper.toProductResponse(target);
+        return toProductResponse(target);
     }
 
     public ProductResponse save(ProductRequest product) {
@@ -40,17 +43,13 @@ public class ProductService {
             product.imageUrl()).ifPresent(p -> {
             throw new ProductAlreadyExistsException();
         });
-        return GlobalMapper.toProductResponse(
-            productRepository.save(GlobalMapper.toProduct(product)));
+        return toProductResponse(productRepository.save(from(product)));
     }
 
     public ProductResponse update(UUID id, ProductRequest product) {
-        Product foundProduct = productRepository.findById(id)
-            .orElseThrow(ProductNotExistsException::new);
-        foundProduct.setName(product.name());
-        foundProduct.setPrice(product.price());
-        foundProduct.setImageUrl(product.imageUrl());
-        return GlobalMapper.toProductResponse(productRepository.save(foundProduct));
+        Product target = productRepository.findById(id).orElseThrow(ProductNotExistsException::new);
+        target.updateDetails(product.name(), product.price(), product.imageUrl());
+        return toProductResponse(target);
     }
 
     public void delete(UUID id) {
